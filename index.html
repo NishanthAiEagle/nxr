@@ -462,57 +462,6 @@
     ══════════════════════════════════════ */
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfCo0pedbHvN1K9A1L7jvm8gFJE_DXuj_ZoZ_2DKfz2VvuHS-oLwYrNWPRoXLS4KHlE16wNnaJZCDc/pub?output=csv';
 
-    // Local Fallback Data
-    let dishes = [
-      { 
-        name: "Almond Chocolate",       
-        folder: "almond_chocolate",       
-        model: "almond_chocolate.glb",       
-        usdz: "almond_chocolate.usdz",       
-        thumb: "almond_chocolate.jpg",       
-        scale: "1 1 1",   
-        rotation: "90 0 0",
-        desc: "Roasted Californian almonds\nRich cocoa ganache fudge\nHand-dipped crisp shell",
-        weight: "160 g",
-        price: "₹450"
-      },
-      { 
-        name: "Cashew Nut Chocolate",     
-        folder: "cashew_nut_chocolate",     
-        model: "cashew_nut_chocolate.glb",     
-        usdz: "cashew_nut_chocolate.usdz",     
-        thumb: "cashew_nut_chocolate.jpg",     
-        scale: "1 1 1",    
-        rotation: "90 0 0",
-        desc: "Caramelized whole cashews\nVelvety milk chocolate glaze\nDelicate sea salt finish",
-        weight: "180 g",
-        price: "₹480"
-      },
-      { 
-        name: "Mix Chocolate", 
-        folder: "mix_chocolate", 
-        model: "mix_chocolate.glb", 
-        usdz: "mix_chocolate.usdz", 
-        thumb: "mix_chocolate.jpg", 
-        scale: "1 1 1",    
-        rotation: "90 0 0",
-        desc: "Assorted gourmet nuts\nDark & white cocoa swirls\nCrunchy praline bites",
-        weight: "200 g",
-        price: "₹520"
-      },
-      { 
-        name: "White Chocolate",    
-        folder: "white_choclate",    
-        model: "white_choclate.glb",    
-        usdz: "white_choclate.usdz",    
-        thumb: "white_choclate.jpg",    
-        scale: "1 1 1", 
-        rotation: "90 0 0",
-        desc: "Pure cocoa butter cream\nBourbon vanilla bean infusion\nSilky melt-in-mouth finish",
-        weight: "150 g",
-        price: "₹420"
-      },
-    ];
 
     /* ── CSV PARSER HELPER ── */
     function parseCSV(text) {
