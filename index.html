@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chocolate</title>
+
+<style>
+
+/* =========================
+   RESET
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111;
+    color: white;
+    overflow: hidden;
+}
+
+
+/* =========================
+   MAIN HERO
+========================= */
+
+.hero {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+
+    background-image:
+        linear-gradient(
+            rgba(0,0,0,0.10),
+            rgba(0,0,0,0.25)
+        ),
+        url("https://images.unsplash.com/photo-1575377427642-087cf684f29d?auto=format&fit=crop&w=2000&q=90");
+
+    background-size: cover;
+    background-position: center;
+}
+
+
+/* Dark overlay */
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        90deg,
+        rgba(0,0,0,0.05),
+        rgba(0,0,0,0.05),
+        rgba(0,0,0,0.20)
+    );
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    position: absolute;
+    top: 25px;
+    left: 40px;
+    right: 40px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    z-index: 10;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+.menu {
+    display: flex;
+    gap: 25px;
+    font-size: 13px;
+}
+
+.menu span {
+    cursor: pointer;
+}
+
+
+/* =========================
+   INFORMATION CARD
+========================= */
+
+.info-card {
+    position: absolute;
+
+    top: 100px;
+    right: 38%;
+
+    width: 275px;
+
+    padding: 20px;
+
+    background: rgba(35, 20, 18, 0.92);
+
+    border-radius: 12px;
+
+    z-index: 20;
+
+    box-shadow: 0 15px 50px rgba(0,0,0,0.35);
+
+    transition: 0.4s ease;
+}
+
+.info-card h1 {
+    font-family: Georgia, serif;
+
+    font-size: 21px;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 18px;
+}
+
+.info-card .line {
+    width: 100%;
+    height: 1px;
+
+    background: rgba(255,255,255,0.2);
+
+    margin-bottom: 14px;
+}
+
+.info-card .type {
+    font-size: 12px;
+    opacity: 0.7;
+
+    margin-bottom: 28px;
+}
+
+.info-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-bottom span {
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.price {
+    font-family: Georgia, serif;
+
+    font-size: 18px !important;
+
+    opacity: 1 !important;
+}
+
+
+/* =========================
+   MAIN CHOCOLATE
+========================= */
+
+.main-product {
+    position: absolute;
+
+    width: 550px;
+    height: 550px;
+
+    left: 50%;
+    top: 52%;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-product img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    filter:
+        drop-shadow(0 30px 25px rgba(0,0,0,0.45));
+
+    transition:
+        opacity 0.35s ease,
+        transform 0.5s ease;
+}
+
+.main-product.change img {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.buttons {
+    position: absolute;
+
+    bottom: 115px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    gap: 10px;
+
+    z-index: 20;
+}
+
+.btn {
+    height: 40px;
+
+    padding: 0 28px;
+
+    border-radius: 8px;
+
+    border: none;
+
+    font-size: 11px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    transition: 0.25s ease;
+}
+
+.btn-light {
+    background: #fff;
+    color: #30211d;
+}
+
+.btn-dark {
+    background: #251817;
+    color: #fff;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+
+/* =========================
+   CAROUSEL AREA
+========================= */
+
+.carousel-wrapper {
+    position: absolute;
+
+    bottom: 28px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 300px;
+    height: 75px;
+
+    z-index: 30;
+}
+
+
+/*
+    The track is intentionally wider than
+    the visible area.
+
+    This allows ALL 4 items to exist.
+*/
+
+.carousel-window {
+    width: 300px;
+    height: 75px;
+
+    overflow: hidden;
+
+    position: relative;
+}
+
+.carousel-track {
+    position: absolute;
+
+    left: 50%;
+    top: 0;
+
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    transform: translateX(-50%);
+
+    transition:
+        transform 0.65s cubic-bezier(.22,.61,.36,1);
+}
+
+
+/* =========================
+   CAROUSEL ITEM
+========================= */
+
+.carousel-item {
+    flex: 0 0 60px;
+
+    width: 60px;
+    height: 60px;
+
+    border-radius: 50%;
+
+    background: rgba(20,15,14,0.85);
+
+    border: 1px solid rgba(255,255,255,0.15);
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.35s ease,
+        opacity 0.35s ease,
+        border 0.35s ease;
+
+    overflow: hidden;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+}
+
+.carousel-item:hover {
+    transform: scale(1.08);
+}
+
+.carousel-item.active {
+    border: 2px solid #fff;
+
+    transform: scale(1.08);
+
+    box-shadow:
+        0 0 0 4px rgba(255,255,255,0.08);
+}
+
+
+/* =========================
+   ITEM LABEL
+========================= */
+
+.item-label {
+    position: absolute;
+
+    top: 66px;
+
+    width: 60px;
+
+    text-align: center;
+
+    font-size: 7px;
+
+    opacity: 0.65;
+}
+
+
+/* =========================
+   SIDE ARROWS
+========================= */
+
+.arrow {
+    position: absolute;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 30px;
+    height: 30px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,0.25);
+
+    background: rgba(20,15,14,0.7);
+
+    color: white;
+
+    cursor: pointer;
+
+    z-index: 50;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.arrow-left {
+    left: -45px;
+}
+
+.arrow-right {
+    right: -45px;
+}
+
+.arrow:hover {
+    background: white;
+    color: #222;
+}
+
+
+/* =========================
+   BOTTOM TEXT
+========================= */
+
+.bottom-text {
+    position: absolute;
+
+    bottom: 28px;
+    right: 35px;
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+
+    opacity: 0.6;
+
+    z-index: 20;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 800px) {
+
+    .header {
+        left: 20px;
+        right: 20px;
+    }
+
+    .menu {
+        display: none;
+    }
+
+    .info-card {
+        top: 80px;
+        right: 20px;
+
+        width: 230px;
+    }
+
+    .main-product {
+        width: 400px;
+        height: 400px;
+
+        top: 52%;
+    }
+
+    .buttons {
+        bottom: 110px;
+    }
+
+    .carousel-wrapper {
+        bottom: 25px;
+    }
+
+    .bottom-text {
+        display: none;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =================================
+     HERO
+================================= -->
+
+<section class="hero">
+
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div class="logo">
+            CHOCOLATE
+        </div>
+
+        <nav class="menu">
+            <span>HOME</span>
+            <span>MENU</span>
+            <span>ABOUT</span>
+            <span>CONTACT</span>
+        </nav>
+
+    </header>
+
+
+
+    <!-- =================================
+         INFORMATION CARD
+    ================================= -->
+
+    <div class="info-card">
+
+        <h1 id="productTitle">
+            CHOCOLATE
+        </h1>
+
+        <div class="line"></div>
+
+        <div class="type" id="productType">
+            fudge
+        </div>
+
+        <div class="info-bottom">
+
+            <span id="productWeight">
+                250g
+            </span>
+
+            <span class="price" id="productPrice">
+                249
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================
+         MAIN PRODUCT
+    ================================= -->
+
+    <div class="main-product" id="mainProduct">
+
+        <img
+            id="mainImage"
+            src="https://images.unsplash.com/photo-1575377427642-087cf684f29d?auto=format&fit=crop&w=1000&q=90"
+            alt="Chocolate"
+        >
+
+    </div>
+
+
+
+    <!-- =================================
+         BUTTONS
+    ================================= -->
+
+    <div class="buttons">
+
+        <button class="btn btn-light">
+            ☎ &nbsp; BOOK TABLE
+        </button>
+
+        <button class="btn btn-dark">
+            📍 &nbsp; DIRECTIONS
+        </button>
+
+    </div>
+
+
+
+    <!-- =================================
+         CAROUSEL
+    ================================= -->
+
+    <div class="carousel-wrapper">
+
+        <button
+            class="arrow arrow-left"
+            id="prevBtn">
+            ‹
+        </button>
+
+
+        <div class="carousel-window">
+
+            <div
+                class="carousel-track"
+                id="carouselTrack">
+
+
+                <!-- ITEM 1 -->
+
+                <div
+                    class="carousel-item active"
+                    data-index="0">
+
+                    <img
+                        src="https://images.unsplash.com/photo-1575377427642-087cf684f29d?auto=format&fit=crop&w=300&q=80"
+                        alt="Chocolate">
+
+                </div>
+
+
+
+                <!-- ITEM 2 -->
+
+                <div
+                    class="carousel-item"
+                    data-index="1">
+
+                    <img
+                        src="https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=300&q=80"
+                        alt="Dark Chocolate">
+
+                </div>
+
+
+
+                <!-- ITEM 3 -->
+
+                <div
+                    class="carousel-item"
+                    data-index="2">
+
+                    <img
+                        src="https://images.unsplash.com/photo-1548907040-4d42c3b7c8f8?auto=format&fit=crop&w=300&q=80"
+                        alt="Chocolate">
+
+                </div>
+
+
+
+                <!-- ITEM 4 -->
+
+                <div
+                    class="carousel-item"
+                    data-index="3">
+
+                    <img
+                        src="https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&w=300&q=80"
+                        alt="Chocolate">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="arrow arrow-right"
+            id="nextBtn">
+            ›
+        </button>
+
+    </div>
+
+
+
+    <div class="bottom-text">
+        SCROLL TO EXPLORE
+    </div>
+
+
+</section>
+
+
+
+<script>
+
+/* =====================================
+   PRODUCT DATA
+===================================== */
+
+const products = [
+
+    {
+        title: "CHOCOLATE",
+        type: "fudge",
+        weight: "250g",
+        price: "249",
+        image:
+        "https://images.unsplash.com/photo-1575377427642-087cf684f29d?auto=format&fit=crop&w=1000&q=90"
+    },
+
+    {
+        title: "DARK CHOCOLATE",
+        type: "dark",
+        weight: "200g",
+        price: "299",
+        image:
+        "https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=1000&q=90"
+    },
+
+    {
+        title: "ALMOND CHOCOLATE",
+        type: "almond",
+        weight: "250g",
+        price: "349",
+        image:
+        "https://images.unsplash.com/photo-1548907040-4d42c3b7c8f8?auto=format&fit=crop&w=1000&q=90"
+    },
+
+    {
+        title: "PREMIUM CHOCOLATE",
+        type: "premium",
+        weight: "300g",
+        price: "399",
+        image:
+        "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&w=1000&q=90"
+    }
+
+];
+
+
+/* =====================================
+   ELEMENTS
+===================================== */
+
+const mainImage =
+    document.getElementById("mainImage");
+
+const mainProduct =
+    document.getElementById("mainProduct");
+
+const title =
+    document.getElementById("productTitle");
+
+const type =
+    document.getElementById("productType");
+
+const weight =
+    document.getElementById("productWeight");
+
+const price =
+    document.getElementById("productPrice");
+
+const items =
+    document.querySelectorAll(".carousel-item");
+
+const track =
+    document.getElementById("carouselTrack");
+
+const nextBtn =
+    document.getElementById("nextBtn");
+
+const prevBtn =
+    document.getElementById("prevBtn");
+
+
+/* =====================================
+   CURRENT INDEX
+===================================== */
+
+let currentIndex = 0;
+
+
+/* =====================================
+   UPDATE PRODUCT
+===================================== */
+
+function updateProduct(index) {
+
+    currentIndex = index;
+
+    const product =
+        products[currentIndex];
+
+
+    /*
+       Animation OUT
+    */
+
+    mainProduct.classList.add("change");
+
+
+    setTimeout(() => {
+
+        mainImage.src =
+            product.image;
+
+        title.textContent =
+            product.title;
+
+        type.textContent =
+            product.type;
+
+        weight.textContent =
+            product.weight;
+
+        price.textContent =
+            product.price;
+
+
+        /*
+           Animation IN
+        */
+
+        mainProduct.classList.remove("change");
+
+    }, 200);
+
+
+    /*
+       Update active item
+    */
+
+    items.forEach((item, i) => {
+
+        item.classList.toggle(
+            "active",
+            i === currentIndex
+        );
+
+    });
+
+
+    /*
+       IMPORTANT:
+       This moves the carousel
+       LEFT when going forward.
+
+       This is what fixes the
+       incorrect rotation direction.
+    */
+
+    moveCarousel();
+
+}
+
+
+/* =====================================
+   MOVE CAROUSEL
+===================================== */
+
+function moveCarousel() {
+
+    const itemWidth = 75;
+
+    /*
+       Center the current item.
+
+       Formula makes sure all 4 items
+       can move through the carousel.
+    */
+
+    const offset =
+        -(currentIndex * itemWidth);
+
+    track.style.transform =
+        `translateX(calc(-50% + ${offset}px))`;
+
+}
+
+
+/* =====================================
+   NEXT
+===================================== */
+
+function nextProduct() {
+
+    currentIndex++;
+
+    if (currentIndex >= products.length) {
+        currentIndex = 0;
+    }
+
+    updateProduct(currentIndex);
+
+}
+
+
+/* =====================================
+   PREVIOUS
+===================================== */
+
+function previousProduct() {
+
+    currentIndex--;
+
+    if (currentIndex < 0) {
+        currentIndex = products.length - 1;
+    }
+
+    updateProduct(currentIndex);
+
+}
+
+
+/* =====================================
+   BUTTON EVENTS
+===================================== */
+
+nextBtn.addEventListener(
+    "click",
+    nextProduct
+);
+
+prevBtn.addEventListener(
+    "click",
+    previousProduct
+);
+
+
+/* =====================================
+   CLICK ON ITEM
+===================================== */
+
+items.forEach((item) => {
+
+    item.addEventListener(
+        "click",
+        () => {
+
+            const index =
+                Number(
+                    item.dataset.index
+                );
+
+            updateProduct(index);
+
+            resetAutoPlay();
+
+        }
+    );
+
+});
+
+
+/* =====================================
+   AUTO PLAY
+===================================== */
+
+let autoPlay =
+    setInterval(
+        nextProduct,
+        4000
+    );
+
+
+/* =====================================
+   RESET AUTO PLAY
+===================================== */
+
+function resetAutoPlay() {
+
+    clearInterval(autoPlay);
+
+    autoPlay =
+        setInterval(
+            nextProduct,
+            4000
+        );
+
+}
+
+
+/* =====================================
+   INITIAL POSITION
+===================================== */
+
+moveCarousel();
+
+
+</script>
+
+</body>
+</html>
