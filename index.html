@@ -383,8 +383,8 @@
       </div>
       <p class="desc" id="cardDesc">Loading details...</p>
       <div class="glass-card-footer">
-        <span class="weight" id="cardWeight">160 g</span>
-        <span class="price" id="cardPrice">₹450</span>
+        <span class="weight" id="cardWeight">250g</span>
+        <span class="price" id="cardPrice">₹249</span>
       </div>
 
       <div class="card-pointer-wrap">
@@ -449,6 +449,7 @@
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-entity id="target1" mindar-image-target="targetIndex: 0">
+      <!-- Turntable wrapper rotates along the Z axis (normal to the card's face) -->
       <a-entity id="rotationWrapper" position="0 0 0" rotation="0 0 0">
         <a-entity id="modelEntity" position="0 0 0" rotation="90 0 0" scale="1 1 1" gltf-model=""></a-entity>
       </a-entity>
@@ -466,7 +467,7 @@
     let arStarted = false;
     let readyTimeoutId = null;
 
-    /* ── ROBUST CSV SPLITTER (safely respects quoted text containing commas) ── */
+    /* ── CSV PARSER (Safely handles quoted strings, commas, & newlines) ── */
     function parseCSV(text) {
       const lines = text.trim().split(/\r?\n/);
       if (lines.length < 2) return [];
@@ -515,10 +516,10 @@
           dishes = parsed;
           buildCarousel();
         } else {
-          throw new Error("No items found in sheet");
+          throw new Error("No entries returned from sheet");
         }
       } catch (err) {
-        console.error('Sheet fetch failed, applying default data:', err);
+        console.error('Sheet fetch error, using local fallback:', err);
         dishes = [
           { 
             name: "Almond Chocolate", folder: "almond_chocolate", model: "almond_chocolate.glb", 
@@ -641,17 +642,37 @@
       document.head.appendChild(link);
     }
 
+    /* ── ROTATION SANITIZER: Guarantees 3 space-separated numbers (defaults to 90 0 0) ── */
+    function sanitizeRotation(rotStr) {
+      if (!rotStr) return '90 0 0';
+      const parts = rotStr.trim().split(/\s+/);
+      if (parts.length === 3) return parts.join(' ');
+      if (parts.length > 3) return parts.slice(-3).join(' '); // Strips leading glitch numbers
+      return '90 0 0';
+    }
+
+    /* ── SCALE SANITIZER: Guarantees 3 space-separated numbers (defaults to 1 1 1) ── */
+    function sanitizeScale(scaleStr) {
+      if (!scaleStr) return '1 1 1';
+      const parts = scaleStr.trim().split(/\s+/);
+      if (parts.length === 3) return parts.join(' ');
+      return '1 1 1';
+    }
+
     function selectDish(index) {
       if (!dishes || dishes.length === 0 || !dishes[index]) return;
       currentIndex = index;
       const dish = dishes[index];
 
+      const cleanScale = sanitizeScale(dish.scale);
+      const cleanRotation = sanitizeRotation(dish.rotation);
+
       modelEntity.removeAttribute('gltf-model');
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           modelEntity.setAttribute('gltf-model', `3d-model/${dish.folder}/${dish.model}`);
-          modelEntity.setAttribute('scale', dish.scale || '1 1 1');
-          modelEntity.setAttribute('rotation', dish.rotation || '90 0 0');
+          modelEntity.setAttribute('scale', cleanScale);
+          modelEntity.setAttribute('rotation', cleanRotation);
         });
       });
 
@@ -667,8 +688,12 @@
 
       setupNativeARLink(dish);
       vibrate(15);
+
+      const nextDish = dishes[(index + 1) % dishes.length];
+      preloadModel(nextDish);
     }
 
+    /* ── TURNTABLE ROTATION (Z-axis spins model directly on the face of the card) ── */
     if (!prefersReducedMotion) {
       rotationWrapper.setAttribute('animation', 'property: rotation; to: 0 0 360; dur: 14000; easing: linear; loop: true');
     }
