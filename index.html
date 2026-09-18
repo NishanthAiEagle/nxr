@@ -20,7 +20,6 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      /* 🔒 Bulletproof Mobile Copy/Long-press Protection for both Android & iOS */
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       user-select: none;
@@ -48,7 +47,7 @@
       overflow: hidden;
       overscroll-behavior: none;
       position: fixed;
-      touch-action: manipulation; /* kills iOS double-tap-zoom delay */
+      touch-action: manipulation;
     }
 
     .a-enter-vr-button { display: none !important; }
@@ -83,7 +82,6 @@
 
     .start-inner { display: flex; flex-direction: column; align-items: center; max-width: 320px; width: 100%; }
 
-    /* 🖼️ LOGO SLOT */
     .start-logo {
       width: 72px; height: 72px; margin-bottom: 32px; padding: 14px;
       object-fit: contain; filter: brightness(0) invert(1);
@@ -172,7 +170,7 @@
       color: var(--gold-light); letter-spacing: 0.05em; z-index: 200; opacity: 0; transition: opacity 0.5s;
     }
 
-    /* ── DUAL-ACTION MARKETING HUB ── */
+    /* ── MARKETING HUB ── */
     #marketingHub {
       position: fixed; bottom: calc(125px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
       display: flex; gap: 10px; z-index: 210; opacity: 0; pointer-events: none;
@@ -193,7 +191,7 @@
     #btnBook { background: var(--cream); color: var(--ink); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
     #btnMaps { background: var(--glass-dark); color: var(--cream); border: 1px solid var(--gold-border); backdrop-filter: blur(10px); }
 
-    /* ── NATIVE AR (Quick Look / Scene Viewer) LAUNCH BUTTON ── */
+    /* ── NATIVE AR LINK ── */
     #btnViewAR {
       position: fixed; bottom: calc(180px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
       display: none; align-items: center; justify-content: center; gap: 8px;
@@ -230,22 +228,15 @@
       background: var(--glass-dark); border: 1px solid var(--gold-border); border-radius: 20px;
       backdrop-filter: blur(14px); padding: 28px 32px; max-width: 260px; text-align: center;
     }
-    #scanHint .scan-icon {
-      width: 44px; height: 44px;
-    }
+    #scanHint .scan-icon { width: 44px; height: 44px; }
     #scanHint .scan-frame-corner { fill: none; stroke: var(--gold); stroke-width: 1.5; }
     #scanHint p.scan-title {
       font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 500;
-      color: var(--gold-light); letter-spacing: 0.02em; text-transform: none;
+      color: var(--gold-light); letter-spacing: 0.02em;
     }
     #scanHint p.scan-sub {
       font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
       color: rgba(245,240,232,0.45); line-height: 1.6; margin-top: 2px;
-    }
-
-    .sr-only {
-      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
   </style>
 </head>
@@ -254,11 +245,8 @@
   <!-- ── START SCREEN ── -->
   <div id="startScreen">
     <div class="start-inner">
-      <!-- 🖼️ 1. CHANGE LOGO IMAGE HERE (leave src empty to hide it entirely) -->
       <img class="start-logo" src="logo1.png" alt="Restaurant logo" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ccircle cx=%2232%22 cy=%2232%22 r=%2226%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22/%3E%3Cpath d=%22M32 16 L42 32 L32 48 L22 32 Z%22 fill=%22%23000%22/%3E%3C/svg%3E';">
-
       <h1>Experience Our<br><em>Signature Creations</em></h1>
-
       <button id="startBtn" aria-label="Start camera and view live menu">View Live Menu</button>
       <div id="startHint"></div>
     </div>
@@ -288,7 +276,7 @@
     <p id="loadingStatus">Preparing Culinary Display</p>
   </div>
 
-  <!-- ── INTERACTIVE OVERLAYS ── -->
+  <!-- ── OVERLAYS ── -->
   <img src="logo1.png" id="logo" alt="Restaurant logo" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ccircle cx=%2232%22 cy=%2232%22 r=%2226%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222%22/%3E%3Cpath d=%22M32 16 L42 32 L32 48 L22 32 Z%22 fill=%22%23000%22/%3E%3C/svg%3E';">
   <div id="dishLabel" role="status"><span class="label-dot"></span><span id="dishLabelText">...</span></div>
 
@@ -303,7 +291,6 @@
     </button>
   </div>
 
-  <!-- Native AR launcher: iOS Quick Look (usdz) / Android Scene Viewer (glb) -->
   <a id="btnViewAR" rel="ar" aria-label="View this dish in AR using your phone's native viewer">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7v10l10 5 10-5V7L12 2zm0 2.3 6.5 3.25L12 10.8 5.5 7.55 12 4.3zM4 9.2l7 3.5v7.6l-7-3.5V9.2zm9 11.1v-7.6l7-3.5v7.6l-7 3.5z"/></svg>
     <span>View in Your Space</span>
@@ -342,94 +329,112 @@
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-entity id="target1" mindar-image-target="targetIndex: 0">
-      <a-entity
-        id="rotationWrapper"
-        position="0 0 0"
-        rotation="0 0 0">
-        <a-entity
-          id="modelEntity"
-          position="0 0 0"
-          rotation="90 90 90"
-          scale="1 1 1"
-          gltf-model="">
-        </a-entity>
+      <a-entity id="rotationWrapper" position="0 0 0" rotation="0 0 0">
+        <a-entity id="modelEntity" position="0 0 0" rotation="0 0 0" scale="1 1 1" gltf-model=""></a-entity>
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
     /* ══════════════════════════════════════
-       DISH DATA
-       (usdz added for native iOS AR Quick Look;
-        glb doubles as the Android Scene Viewer source)
+       UPDATED CHOCOLATE MODEL DATA
+       (Paths, extensions, and names mapped to your repo)
     ══════════════════════════════════════ */
     const dishes = [
-      { name: "cheesygreen",       folder: "cheesygreen",       model: "cheesygreen.glb",       usdz: "cheesygreen.usdz",       thumb: "cheesygreen.png",       scale: "12 12 12",   rotation: "90 90 90" },
-      { name: "friedcalamari",     folder: "friedcalamari",     model: "friedcalamari.glb",     usdz: "friedcalamari.usdz",     thumb: "friedcalamari.png",     scale: "26 26 26",    rotation: "90 90 90" },
-      { name: "pinocchiotiramisu", folder: "pinocchiotiramisu", model: "pinocchiotiramisu.glb", usdz: "pinocchiotiramisu.usdz", thumb: "pinocchiotiramisu.png", scale: "26 26 26",    rotation: "90 90 90" },
-      { name: "pistachiosauce",    folder: "pistachiosauce",    model: "pistachiosauce.glb",    usdz: "pistachiosauce.usdz",    thumb: "pistachiosauce.png",    scale: "3.5 3.5 3.5", rotation: "90 90 90" },
+      { 
+        name: "Almond Chocolate",       
+        folder: "almond_chocolate",       
+        model: "almond_chocolate.glb",       
+        usdz: "almond_chocolate.usdz",       
+        thumb: "almond_chocolate.jpg",       
+        scale: "1 1 1",   
+        rotation: "0 0 0" 
+      },
+      { 
+        name: "Cashew Nut Chocolate",     
+        folder: "cashew_nut_chocolate",     
+        model: "cashew_nut_chocolate.glb",     
+        usdz: "cashew_nut_chocolate.usdz",     
+        thumb: "cashew_nut_chocolate.jpg",     
+        scale: "1 1 1",    
+        rotation: "0 0 0" 
+      },
+      { 
+        name: "Mix Chocolate", 
+        folder: "mix_chocolate", 
+        model: "mix_chocolate.glb", 
+        usdz: "mix_chocolate.usdz", 
+        thumb: "mix_chocolate.jpg", 
+        scale: "1 1 1",    
+        rotation: "0 0 0" 
+      },
+      { 
+        name: "White Chocolate",    
+        folder: "white_choclate",    
+        model: "white_choclate.glb",    
+        usdz: "white_choclate.usdz",    
+        thumb: "white_choclate.jpg",    
+        scale: "1 1 1", 
+        rotation: "0 0 0" 
+      },
     ];
 
     let currentIndex = -1;
     let arStarted = false;
     let readyTimeoutId = null;
 
-    const modelEntity    = document.querySelector('#modelEntity');
-    const rotationWrapper= document.querySelector('#rotationWrapper');
-    const dishLabel      = document.querySelector('#dishLabel');
-    const dishLabelText  = document.querySelector('#dishLabelText');
-    const carousel       = document.querySelector('#dishCarousel');
-    const marketingHub   = document.querySelector('#marketingHub');
-    const logo           = document.querySelector('#logo');
-    const scanHint       = document.querySelector('#scanHint');
-    const target         = document.querySelector('#target1');
-    const arScene        = document.querySelector('#arScene');
-    const startScreen    = document.querySelector('#startScreen');
-    const startBtn       = document.querySelector('#startBtn');
-    const startHint      = document.querySelector('#startHint');
-    const loadingOverlay = document.querySelector('#loadingOverlay');
-    const swipeZone      = document.querySelector('#swipeZone');
-    const errorScreen    = document.querySelector('#errorScreen');
-    const errorTitle     = document.querySelector('#errorTitle');
-    const errorMessage   = document.querySelector('#errorMessage');
-    const errorSteps     = document.querySelector('#errorSteps');
-    const errorRetryBtn  = document.querySelector('#errorRetryBtn');
-    const btnViewAR      = document.querySelector('#btnViewAR');
-    const arThumb        = document.querySelector('#arThumb');
+    const modelEntity     = document.querySelector('#modelEntity');
+    const rotationWrapper = document.querySelector('#rotationWrapper');
+    const dishLabel       = document.querySelector('#dishLabel');
+    const dishLabelText   = document.querySelector('#dishLabelText');
+    const carousel        = document.querySelector('#dishCarousel');
+    const marketingHub    = document.querySelector('#marketingHub');
+    const logo            = document.querySelector('#logo');
+    const scanHint        = document.querySelector('#scanHint');
+    const target          = document.querySelector('#target1');
+    const arScene         = document.querySelector('#arScene');
+    const startScreen     = document.querySelector('#startScreen');
+    const startBtn        = document.querySelector('#startBtn');
+    const loadingOverlay  = document.querySelector('#loadingOverlay');
+    const swipeZone       = document.querySelector('#swipeZone');
+    const errorScreen     = document.querySelector('#errorScreen');
+    const errorTitle      = document.querySelector('#errorTitle');
+    const errorMessage    = document.querySelector('#errorMessage');
+    const errorSteps      = document.querySelector('#errorSteps');
+    const errorRetryBtn   = document.querySelector('#errorRetryBtn');
+    const btnViewAR       = document.querySelector('#btnViewAR');
+    const arThumb         = document.querySelector('#arThumb');
 
-    /* ── PLATFORM DETECTION ── */
     const ua = navigator.userAgent || '';
     const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isAndroid = /Android/.test(ua);
     const isSecure = window.isSecureContext || location.hostname === 'localhost';
     const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ── VIDEO LAYER OBSERVER (ensures inline, muted playback on iOS Safari) ── */
     const videoObserver = new MutationObserver(() => {
       const vid = arScene.querySelector('video');
       if (vid) {
-        vid.setAttribute('playsinline', ''); vid.setAttribute('webkit-playsinline', '');
-        vid.setAttribute('muted', ''); vid.muted = true; vid.setAttribute('autoplay', '');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
+        vid.setAttribute('muted', '');
+        vid.muted = true;
+        vid.setAttribute('autoplay', '');
         vid.play().catch(() => {});
         videoObserver.disconnect();
       }
     });
     videoObserver.observe(arScene, { childList: true, subtree: true });
 
-    /* ── HAPTICS (Android Chrome only — safely no-ops on iOS Safari) ── */
     function vibrate(pattern) {
       try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
     }
 
-    /* ── NATIVE AR LINK (iOS Quick Look / Android Scene Viewer) ── */
     function setupNativeARLink(dish) {
       if (isIOS) {
-        // Apple AR Quick Look requires an <a rel="ar"> containing an <img>, href = .usdz
         btnViewAR.href = `3d-model/${dish.folder}/${dish.usdz}`;
         arThumb.src = `3d-model/${dish.folder}/${dish.thumb}`;
         btnViewAR.classList.add('visible');
       } else if (isAndroid) {
-        // Android Scene Viewer needs an absolute https URL to the glb
         const absoluteModelUrl = new URL(`3d-model/${dish.folder}/${dish.model}`, window.location.href).href;
         const fallbackUrl = window.location.href;
         const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(absoluteModelUrl)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end;`;
@@ -441,7 +446,6 @@
       }
     }
 
-    /* ── POPULATE INTERFACE ── */
     dishes.forEach((dish, i) => {
       const thumb = document.createElement('div');
       thumb.className = 'dish-thumb' + (i === 0 ? ' active' : '');
@@ -458,7 +462,6 @@
     });
 
     function preloadModel(dish) {
-      // Warm the browser cache for the next likely dish so carousel taps feel instant
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'fetch';
@@ -490,17 +493,14 @@
       setupNativeARLink(dish);
       vibrate(15);
 
-      // Preload the next dish in the list for a snappier next tap
       const nextDish = dishes[(index + 1) % dishes.length];
       preloadModel(nextDish);
     }
 
-    /* ── ROTATION (respects prefers-reduced-motion) ── */
     if (!prefersReducedMotion) {
-      rotationWrapper.setAttribute('animation', 'property: rotation; to: 0 0 360; dur: 14000; easing: linear; loop: true');
+      rotationWrapper.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 14000; easing: linear; loop: true');
     }
 
-    /* ── ERROR SCREEN HELPERS ── */
     function showError(kind) {
       loadingOverlay.classList.remove('show');
       startScreen.style.display = 'none';
@@ -515,10 +515,10 @@
         errorRetryBtn.style.display = 'none';
       } else if (kind === 'denied') {
         errorTitle.textContent = 'Camera Access Needed';
-        errorMessage.textContent = 'Camera permission was denied, so we can\'t bring the menu to life.';
+        errorMessage.textContent = 'Camera permission was denied.';
         errorSteps.innerHTML = isIOS
-          ? '• Open Settings → Safari → Camera → Allow<br>• Or tap "aA" in the address bar → Website Settings → Camera → Allow<br>• Then reload this page'
-          : '• Tap the lock/site info icon in the address bar<br>• Turn on Camera permission<br>• Then reload this page';
+          ? '• Open Settings → Safari → Camera → Allow<br>• Reload this page'
+          : '• Tap site settings in address bar → Camera → Allow<br>• Reload this page';
         errorRetryBtn.style.display = 'inline-block';
       } else if (kind === 'notfound') {
         errorTitle.textContent = 'No Camera Found';
@@ -537,11 +537,9 @@
       errorScreen.classList.remove('show');
     }
 
-    /* ── AR CONTROLLERS ── */
     async function startAR() {
       if (arStarted) return;
 
-      // Feature / context detection up front
       if (!isSecure || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showError('unsupported');
         return;
@@ -562,7 +560,6 @@
         arScene.style.pointerEvents = 'auto';
 
         let readyFired = false;
-
         const onReady = () => {
           if (readyFired) return;
           readyFired = true;
@@ -579,8 +576,6 @@
 
         arScene.addEventListener('loaded', onReady, { once: true });
         arScene.addEventListener('arReady', onReady, { once: true });
-
-        // Slightly longer grace period — lower-end Android devices can be slower to init WASM/WebGL
         readyTimeoutId = setTimeout(onReady, 7000);
 
       } catch (err) {
@@ -603,17 +598,14 @@
       requestAnimationFrame(() => { startScreen.style.opacity = '1'; });
     });
 
-    // 📞 1. CHANGE RESERVATION PHONE NUMBER HERE
     document.querySelector('#btnBook').addEventListener('click', () => {
       window.location.href = 'tel:+918068365604';
     });
 
-    // 📍 2. CHANGE GOOGLE MAPS NAVIGATION LOCATION LINK HERE
     document.querySelector('#btnMaps').addEventListener('click', () => {
       window.location.href = 'https://maps.app.goo.gl/AQLNLsv3XV2B6FiQ8';
     });
 
-    /* ── TARGET DISCOVERY TRIGGERS ── */
     target.addEventListener('targetFound', () => {
       dishLabel.style.opacity = '1';
       scanHint.style.opacity = '0';
@@ -625,19 +617,15 @@
       scanHint.style.opacity = '1';
     });
 
-    /* ── MIND-AR-SPECIFIC ERRORS (bad target file, etc.) ── */
     arScene.addEventListener('arError', () => {
       showError('generic');
     });
 
-    /* ===========================
-       DISABLE RIGHT CLICK & DEV TOOLS
-    ============================ */
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.onkeydown = function(e) {
-      if (e.keyCode === 123) return false; // F12
+      if (e.keyCode === 123) return false;
       if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67 || e.keyCode === 75)) return false;
-      if (e.ctrlKey && e.keyCode === 85) return false; // Ctrl+U
+      if (e.ctrlKey && e.keyCode === 85) return false;
     };
   </script>
 </body>
