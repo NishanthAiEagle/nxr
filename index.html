@@ -330,15 +330,15 @@
 
     <a-entity id="target1" mindar-image-target="targetIndex: 0">
       <a-entity id="rotationWrapper" position="0 0 0" rotation="0 0 0">
-        <a-entity id="modelEntity" position="0 0 0" rotation="0 0 0" scale="1 1 1" gltf-model=""></a-entity>
+        <a-entity id="modelEntity" position="0 0 0" rotation="90 0 0" scale="1 1 1" gltf-model=""></a-entity>
       </a-entity>
     </a-entity>
   </a-scene>
 
   <script>
     /* ══════════════════════════════════════
-       UPDATED CHOCOLATE MODEL DATA
-       (Paths, extensions, and names mapped to your repo)
+       CHOCOLATE MODEL DATA
+       (Oriented flat on card: rotation="90 0 0")
     ══════════════════════════════════════ */
     const dishes = [
       { 
@@ -348,7 +348,7 @@
         usdz: "almond_chocolate.usdz",       
         thumb: "almond_chocolate.jpg",       
         scale: "1 1 1",   
-        rotation: "0 90 0" 
+        rotation: "90 0 0" 
       },
       { 
         name: "Cashew Nut Chocolate",     
@@ -357,7 +357,7 @@
         usdz: "cashew_nut_chocolate.usdz",     
         thumb: "cashew_nut_chocolate.jpg",     
         scale: "1 1 1",    
-        rotation: "0 0 0" 
+        rotation: "90 0 0" 
       },
       { 
         name: "Mix Chocolate", 
@@ -366,7 +366,7 @@
         usdz: "mix_chocolate.usdz", 
         thumb: "mix_chocolate.jpg", 
         scale: "1 1 1",    
-        rotation: "0 0 0" 
+        rotation: "90 0 0" 
       },
       { 
         name: "White Chocolate",    
@@ -375,7 +375,7 @@
         usdz: "white_choclate.usdz",    
         thumb: "white_choclate.jpg",    
         scale: "1 1 1", 
-        rotation: "0 0 0" 
+        rotation: "90 0 0" 
       },
     ];
 
@@ -497,8 +497,9 @@
       preloadModel(nextDish);
     }
 
+    /* Turntable spin on the target's face */
     if (!prefersReducedMotion) {
-      rotationWrapper.setAttribute('animation', 'property: rotation; to: 0 360 0; dur: 14000; easing: linear; loop: true');
+      rotationWrapper.setAttribute('animation', 'property: rotation; to: 0 0 360; dur: 14000; easing: linear; loop: true');
     }
 
     function showError(kind) {
