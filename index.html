@@ -163,7 +163,7 @@
       filter: brightness(0) invert(1); transition: opacity 0.5s;
     }
 
-    /* ── FLOATING CALLOUT CARD WITH ANCHOR ── */
+    /* ── FLOATING CALLOUT CARD WITH ANCHOR POINTER ── */
     #dishCardContainer {
       position: fixed;
       top: calc(18px + var(--safe-top));
@@ -387,7 +387,6 @@
         <span class="price" id="cardPrice">₹450</span>
       </div>
 
-      <!-- Pointing Line & Anchor Dot -->
       <div class="card-pointer-wrap">
         <svg viewBox="0 0 48 48">
           <polyline points="2,2 14,24 38,38" fill="none" stroke="rgba(231,180,190,0.7)" stroke-width="1.5" stroke-dasharray="2 2"/>
@@ -458,51 +457,93 @@
 
   <script>
     /* ══════════════════════════════════════
-       1. LIVE GOOGLE SHEET CSV SYNC
+       1. LIVE GOOGLE SHEET CONFIGURATION
     ══════════════════════════════════════ */
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfCo0pedbHvN1K9A1L7jvm8gFJE_DXuj_ZoZ_2DKfz2VvuHS-oLwYrNWPRoXLS4KHlE16wNnaJZCDc/pub?output=csv';
 
+    let dishes = [];
+    let currentIndex = -1;
+    let arStarted = false;
+    let readyTimeoutId = null;
 
-    /* ── CSV PARSER HELPER ── */
+    /* ── ROBUST CSV SPLITTER (safely respects quoted text containing commas) ── */
     function parseCSV(text) {
       const lines = text.trim().split(/\r?\n/);
       if (lines.length < 2) return [];
-      const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
-      
+
+      function splitLine(line) {
+        const fields = [];
+        let current = '';
+        let insideQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            insideQuotes = !insideQuotes;
+          } else if (char === ',' && !insideQuotes) {
+            fields.push(current.trim().replace(/^["']|["']$/g, ''));
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        fields.push(current.trim().replace(/^["']|["']$/g, ''));
+        return fields;
+      }
+
+      const headers = splitLine(lines[0]);
+
       return lines.slice(1).map(line => {
-        const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+        const values = splitLine(line);
         const item = {};
         headers.forEach((header, i) => {
-          let val = (values[i] || '').trim().replace(/^["']|["']$/g, '');
+          let val = (values[i] || '').trim();
           val = val.replace(/\\n/g, '\n');
           item[header] = val;
         });
         return item;
-      });
+      }).filter(d => d.name && d.model);
     }
 
     async function loadSheetData() {
-      if (!SHEET_CSV_URL) {
-        buildCarousel();
-        return;
-      }
       try {
         const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
-        if (!res.ok) throw new Error('Sheet network response error');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const csvText = await res.text();
         const parsed = parseCSV(csvText);
+
         if (parsed.length > 0) {
           dishes = parsed;
+          buildCarousel();
+        } else {
+          throw new Error("No items found in sheet");
         }
       } catch (err) {
-        console.warn('Could not sync with Google Sheet. Loading local defaults.', err);
+        console.error('Sheet fetch failed, applying default data:', err);
+        dishes = [
+          { 
+            name: "Almond Chocolate", folder: "almond_chocolate", model: "almond_chocolate.glb", 
+            usdz: "almond_chocolate.usdz", thumb: "almond_chocolate.jpg", scale: "1 1 1", rotation: "90 0 0",
+            desc: "Roasted Californian almonds\nRich cocoa ganache fudge", weight: "250g", price: "249"
+          },
+          { 
+            name: "Cashew Nut Chocolate", folder: "cashew_nut_chocolate", model: "cashew_nut_chocolate.glb", 
+            usdz: "cashew_nut_chocolate.usdz", thumb: "cashew_nut_chocolate.jpg", scale: "1 1 1", rotation: "90 0 0",
+            desc: "Caramelized whole cashews\nVelvety milk chocolate glaze", weight: "250g", price: "399"
+          },
+          { 
+            name: "Mix Chocolate", folder: "mix_chocolate", model: "mix_chocolate.glb", 
+            usdz: "mix_chocolate.usdz", thumb: "mix_chocolate.jpg", scale: "1 1 1", rotation: "90 0 0",
+            desc: "Assorted gourmet nuts\nDark & white cocoa swirls", weight: "250g", price: "499"
+          },
+          { 
+            name: "White Chocolate", folder: "white_choclate", model: "white_choclate.glb", 
+            usdz: "white_choclate.usdz", thumb: "white_choclate.jpg", scale: "1 1 1", rotation: "90 0 0",
+            desc: "Pure cocoa butter cream\nBourbon vanilla bean infusion", weight: "250g", price: "299"
+          }
+        ];
+        buildCarousel();
       }
-      buildCarousel();
     }
-
-    let currentIndex = -1;
-    let arStarted = false;
-    let readyTimeoutId = null;
 
     const modelEntity       = document.querySelector('#modelEntity');
     const rotationWrapper   = document.querySelector('#rotationWrapper');
@@ -555,6 +596,7 @@
     }
 
     function setupNativeARLink(dish) {
+      if (!dish) return;
       if (isIOS) {
         btnViewAR.href = `3d-model/${dish.folder}/${dish.usdz}`;
         arThumb.src = `3d-model/${dish.folder}/${dish.thumb}`;
@@ -600,7 +642,7 @@
     }
 
     function selectDish(index) {
-      if (index === currentIndex || !dishes[index]) return;
+      if (!dishes || dishes.length === 0 || !dishes[index]) return;
       currentIndex = index;
       const dish = dishes[index];
 
@@ -613,10 +655,10 @@
         });
       });
 
-      cardTitle.textContent = dish.name;
-      cardDesc.textContent = dish.desc;
-      cardWeight.textContent = dish.weight;
-      cardPrice.textContent = dish.price;
+      cardTitle.textContent = dish.name || '';
+      cardDesc.textContent = dish.desc || '';
+      cardWeight.textContent = dish.weight || '';
+      cardPrice.textContent = dish.price ? (dish.price.startsWith('₹') ? dish.price : '₹' + dish.price) : '';
 
       document.querySelectorAll('.dish-thumb').forEach((el, i) => {
         el.classList.toggle('active', i === index);
@@ -625,9 +667,6 @@
 
       setupNativeARLink(dish);
       vibrate(15);
-
-      const nextDish = dishes[(index + 1) % dishes.length];
-      preloadModel(nextDish);
     }
 
     if (!prefersReducedMotion) {
