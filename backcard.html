@@ -32,13 +32,14 @@
 
     .scan-pill {
       background: rgba(8, 28, 16, 0.9);
-      border: 1px solid #d4af37;
+      border: 1.5px solid #d4af37;
       color: #f3e5ab;
       padding: 8px 18px;
       border-radius: 30px;
       font-size: 13px;
       font-weight: 600;
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      transition: all 0.3s ease;
     }
 
     /* Floating Fallback Controller (Shows when video is active) */
@@ -49,7 +50,7 @@
       border: 1.5px solid #d4af37;
       border-radius: 14px;
       padding: 10px 16px;
-      display: none; /* revealed on pin click */
+      display: none;
       align-items: center;
       gap: 12px;
       pointer-events: auto;
@@ -92,7 +93,7 @@
   <div id="ui-container">
     <div class="scan-pill" id="scanPrompt">Point Camera at Ooty Card</div>
 
-    <!-- On-screen Navigation Dock for easy finger tapping -->
+    <!-- Screen fallback dock -->
     <div id="active-info-bar">
       <div>
         <div id="info-title">Location Name</div>
@@ -103,7 +104,7 @@
     </div>
   </div>
 
-  <!-- Hidden HTML5 Video for AR Texture Streaming -->
+  <!-- Hidden HTML5 Video for AR Streaming -->
   <video id="arVideo" crossOrigin="anonymous" playsinline webkit-playsinline loop muted></video>
 
   <!-- MindAR Scene -->
@@ -114,40 +115,47 @@
     vr-mode-ui="enabled: false" 
     device-orientation-permission-ui="enabled: false">
 
-    <a-assets>
-      <!-- Base Pin Texture -->
-      <img id="pinIcon" src="https://cdn-icons-png.flaticon.com/512/684/684908.png" crossorigin="anonymous">
-    </a-assets>
-
     <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable">
     </a-camera>
 
-    <!-- Target Entity: Coordinates mapped across 3.7 x 2.5 Card Aspect Ratio -->
+    <!-- Target Entity: 3.7 x 2.5 Aspect Ratio Map Ground -->
     <a-entity id="cardTarget" mindar-image-target="targetIndex: 0">
 
-      <!-- ================= 1. THE FLOATING VIDEO & DETAILS SCREEN ================= -->
-      <!-- Appears floating right above the card when any landmark is pressed -->
-      <a-entity id="videoScreenGroup" position="0 0.12 0.08" visible="false">
-        <a-video id="videoPlane" src="#arVideo" width="0.85" height="0.48" position="0 0 0"></a-video>
+      <!-- ================= 1. THE FLOATING 3D BILLBOARD SCREEN ================= -->
+      <!-- Elevated above the top edge and tilted 15 degrees toward user -->
+      <a-entity id="videoScreenGroup" position="0 0.58 0.12" rotation="15 0 0" visible="false">
         
-        <!-- Header Banner on AR Video -->
-        <a-plane position="0 0.28 0.01" width="0.85" height="0.08" color="#081c10" material="opacity: 0.95">
-          <a-text id="arVideoTitle" value="LOCATION TITLE" align="center" color="#d4af37" width="1.2" baseline="center"></a-text>
+        <!-- Billboard Outer Frame Structure -->
+        <a-plane position="0 0.02 -0.01" width="0.84" height="0.54" color="#081c10" material="opacity: 0.98; roughness: 0.8; metalness: 0.2">
+        </a-plane>
+        <a-plane position="0 0.02 -0.008" width="0.82" height="0.52" color="#d4af37" material="wireframe: false; opacity: 0.8">
         </a-plane>
 
-        <!-- Direct AR Clickable Navigate Button below video -->
-        <a-plane id="arNavBtn" class="clickable" position="0 -0.28 0.01" width="0.5" height="0.08" color="#258cfb">
-          <a-text value="OPEN GOOGLE MAPS" align="center" color="#ffffff" width="1.1"></a-text>
+        <!-- The Video Display Surface -->
+        <a-video id="videoPlane" src="#arVideo" width="0.78" height="0.42" position="0 0.05 0.01"></a-video>
+        
+        <!-- Header Ribbon on Billboard -->
+        <a-plane position="0 0.23 0.02" width="0.78" height="0.06" color="#0d2818" material="opacity: 0.95">
+          <a-text id="arVideoTitle" value="LOCATION TITLE" align="center" color="#f3e5ab" width="1.1"></a-text>
         </a-plane>
 
-        <!-- Close AR Button -->
-        <a-plane id="arCloseBtn" class="clickable" position="0.39 0.28 0.02" width="0.07" height="0.07" color="#e74c3c">
-          <a-text value="X" align="center" color="#ffffff" width="1.3"></a-text>
+        <!-- Direct Navigate Button (AR Blue Tab) -->
+        <a-plane id="arNavBtn" class="clickable" position="-0.16 -0.18 0.02" width="0.38" height="0.07" color="#258cfb">
+          <a-text value="🧭 NAVIGATE" align="center" color="#ffffff" width="1.05"></a-text>
         </a-plane>
+
+        <!-- Close Button (AR Red Tab) -->
+        <a-plane id="arCloseBtn" class="clickable" position="0.22 -0.18 0.02" width="0.26" height="0.07" color="#c0392b">
+          <a-text value="✕ CLOSE" align="center" color="#ffffff" width="1.05"></a-text>
+        </a-plane>
+
+        <!-- Structural Billboard Legs anchoring down to the card top edge -->
+        <a-cylinder position="-0.32 -0.32 -0.02" radius="0.006" height="0.26" color="#d4af37" opacity="0.8"></a-cylinder>
+        <a-cylinder position="0.32 -0.32 -0.02" radius="0.006" height="0.26" color="#d4af37" opacity="0.8"></a-cylinder>
       </a-entity>
 
-      <!-- ================= 2. INTERACTIVE HOTSPOT BUTTONS ================= -->
-      <!-- Coordinated to match exact visual layout of your Ooty Card -->
+      <!-- ================= 2. INTERACTIVE HOTSPOT BUTTONS ON CARD ================= -->
+      <!-- Positioned precisely along roads radiating from the center -->
 
       <!-- Ooty Lake (Center Top-Left) -->
       <a-plane class="clickable spot-btn" data-id="ooty_lake" position="-0.04 0.18 0.03" width="0.26" height="0.07" color="#081c10" material="opacity: 0.85">
@@ -203,12 +211,11 @@
   </a-scene>
 
   <script>
-    // Landmark Database: Videos, Titles, & Driving Coordinates
     const PLACES = {
       ooty_lake: {
         title: "Ooty Lake & Boathouse",
         time: "13 min (2.4 km)",
-        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", // Replace with your short mp4 clips
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
         maps: "https://www.google.com/maps/dir/?api=1&destination=Ooty+Lake+Boathouse"
       },
       pykara: {
@@ -278,7 +285,7 @@
 
     // Attach click triggers to all AR landmark buttons
     document.querySelectorAll('.spot-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
         const data = PLACES[id];
         if (!data) return;
@@ -291,7 +298,7 @@
         videoEl.load();
         videoEl.play().catch(err => console.log("Autoplay policy handling:", err));
 
-        // 2. Position AR Video Plane and reveal
+        // 2. Reveal Billboard above the card
         arTitle.setAttribute('value', data.title);
         screenGroup.setAttribute('visible', 'true');
 
@@ -303,14 +310,14 @@
       });
     });
 
-    // Handle AR in-scene navigation click
+    // AR Billboard "Navigate" button handler
     document.getElementById('arNavBtn').addEventListener('click', () => {
       if (activeMapUrl && activeMapUrl !== '#') {
         window.open(activeMapUrl, '_blank');
       }
     });
 
-    // Close screen
+    // Close Billboard
     function closeActiveSpot() {
       videoEl.pause();
       screenGroup.setAttribute('visible', 'false');
@@ -319,7 +326,7 @@
 
     document.getElementById('arCloseBtn').addEventListener('click', closeActiveSpot);
 
-    // Camera target found/lost status
+    // Target tracking status
     const cardTarget = document.getElementById('cardTarget');
     const scanPrompt = document.getElementById('scanPrompt');
 
