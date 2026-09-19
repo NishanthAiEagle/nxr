@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>AR Ooty Travel Card</title>
+  <!-- A-Frame and MindAR WebAR Library -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    /* Simple instruction overlay before camera locks target */
+    #scan-overlay {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 40, 24, 0.9);
+      color: #d4af37;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #d4af37;
+      font-family: sans-serif;
+      font-size: 13px;
+      z-index: 999;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="scan-overlay">Point camera at the printed travel card</div>
+
+  <!-- 
+    Replace 'card.mind' with your compiled .mind file path on GitHub Pages
+  -->
+  <a-scene 
+    mindar-image="imageTargetSrc: ./card.mind; autoStart: true; uiScanning: yes;" 
+    color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false" 
+    device-orientation-permission-ui="enabled: false">
+
+    <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable">
+    </a-camera>
+
+    <!-- Target index 0 matches the first card compiled inside card.mind -->
+    <a-entity mindar-image-target="targetIndex: 0">
+      
+      <!-- Interactive 3D/Flat Pin Example: Doddabetta Peak -->
+      <a-plane 
+        class="clickable"
+        id="btn-doddabetta"
+        position="0.3 0.2 0.02" 
+        height="0.12" 
+        width="0.35" 
+        color="#0d2818"
+        material="opacity: 0.9"
+        text="value: Doddabetta\nTap to Navigate; color: #f3e5ab; align: center; width: 0.8;">
+      </a-plane>
+
+      <!-- Interactive 3D/Flat Pin Example: Pykara Lake -->
+      <a-plane 
+        class="clickable"
+        id="btn-pykara"
+        position="-0.35 0.35 0.02" 
+        height="0.12" 
+        width="0.35" 
+        color="#0d2818"
+        material="opacity: 0.9"
+        text="value: Pykara Lake\nTap to Navigate; color: #f3e5ab; align: center; width: 0.8;">
+      </a-plane>
+
+      <!-- Interactive 3D/Flat Pin Example: Avalanche Lake -->
+      <a-plane 
+        class="clickable"
+        id="btn-avalanche"
+        position="-0.25 -0.3 0.02" 
+        height="0.12" 
+        width="0.35" 
+        color="#0d2818"
+        material="opacity: 0.9"
+        text="value: Avalanche Lake\nTap to Navigate; color: #f3e5ab; align: center; width: 0.8;">
+      </a-plane>
+
+    </a-entity>
+  </a-scene>
+
+  <script>
+    // Click listeners on AR buttons directly opening Google Maps routes
+    document.getElementById('btn-doddabetta').addEventListener('click', () => {
+      window.open('https://www.google.com/maps/dir/?api=1&destination=Doddabetta+Peak+Ooty', '_blank');
+    });
+
+    document.getElementById('btn-pykara').addEventListener('click', () => {
+      window.open('https://www.google.com/maps/dir/?api=1&destination=Pykara+Lake+Ooty', '_blank');
+    });
+
+    document.getElementById('btn-avalanche').addEventListener('click', () => {
+      window.open('https://www.google.com/maps/dir/?api=1&destination=Avalanche+Lake+Ooty', '_blank');
+    });
+  </script>
+</body>
+</html>
