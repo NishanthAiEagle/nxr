@@ -3,104 +3,335 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>AR Ooty Travel Card</title>
-  <!-- A-Frame and MindAR WebAR Library -->
+  <title>Ooty AR Smart Concierge</title>
+
+  <!-- A-Frame & MindAR -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
   <style>
     body {
       margin: 0;
       overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    /* Simple instruction overlay before camera locks target */
-    #scan-overlay {
+
+    /* Screen UI Overlay */
+    #ui-container {
       position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(13, 40, 24, 0.9);
-      color: #d4af37;
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid #d4af37;
-      font-family: sans-serif;
-      font-size: 13px;
-      z-index: 999;
+      top: 0;
+      left: 0;
+      width: 100vw;
       pointer-events: none;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 14px;
+    }
+
+    .scan-pill {
+      background: rgba(8, 28, 16, 0.9);
+      border: 1px solid #d4af37;
+      color: #f3e5ab;
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    /* Floating Fallback Controller (Shows when video is active) */
+    #active-info-bar {
+      position: fixed;
+      bottom: 24px;
+      background: rgba(8, 28, 16, 0.95);
+      border: 1.5px solid #d4af37;
+      border-radius: 14px;
+      padding: 10px 16px;
+      display: none; /* revealed on pin click */
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    }
+
+    #info-title {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .btn-maps {
+      background: #258cfb;
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-close {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div id="scan-overlay">Point camera at the printed travel card</div>
+  <div id="ui-container">
+    <div class="scan-pill" id="scanPrompt">Point Camera at Ooty Card</div>
 
-  <!-- 
-    Replace 'card.mind' with your compiled .mind file path on GitHub Pages
-  -->
+    <!-- On-screen Navigation Dock for easy finger tapping -->
+    <div id="active-info-bar">
+      <div>
+        <div id="info-title">Location Name</div>
+        <div id="info-time" style="font-size: 11px; color: #b4c2b8;">Drive time: --</div>
+      </div>
+      <a id="mapsLink" href="#" target="_blank" class="btn-maps">🧭 Directions</a>
+      <button class="btn-close" onclick="closeActiveSpot()">✕</button>
+    </div>
+  </div>
+
+  <!-- Hidden HTML5 Video for AR Texture Streaming -->
+  <video id="arVideo" crossOrigin="anonymous" playsinline webkit-playsinline loop muted></video>
+
+  <!-- MindAR Scene -->
   <a-scene 
-    mindar-image="imageTargetSrc: ./targets/card.mind; autoStart: true; uiScanning: yes;" 
+    mindar-image="imageTargetSrc: ./card.mind; autoStart: true; filterMinCF:0.0001; filterBeta: 0.001;" 
     color-space="sRGB" 
     renderer="colorManagement: true, physicallyCorrectLights" 
     vr-mode-ui="enabled: false" 
     device-orientation-permission-ui="enabled: false">
 
+    <a-assets>
+      <!-- Base Pin Texture -->
+      <img id="pinIcon" src="https://cdn-icons-png.flaticon.com/512/684/684908.png" crossorigin="anonymous">
+    </a-assets>
+
     <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable">
     </a-camera>
 
-    <!-- Target index 0 matches the first card compiled inside card.mind -->
-    <a-entity mindar-image-target="targetIndex: 0">
-      
-      <!-- Interactive 3D/Flat Pin Example: Doddabetta Peak -->
-      <a-plane 
-        class="clickable"
-        id="btn-doddabetta"
-        position="0.3 0.2 0.02" 
-        height="0.12" 
-        width="0.35" 
-        color="#0d2818"
-        material="opacity: 0.9"
-        text="value: Doddabetta\nTap to Navigate; color: #f3e5ab; align: center; width: 0.8;">
+    <!-- Target Entity: Coordinates mapped across 3.7 x 2.5 Card Aspect Ratio -->
+    <a-entity id="cardTarget" mindar-image-target="targetIndex: 0">
+
+      <!-- ================= 1. THE FLOATING VIDEO & DETAILS SCREEN ================= -->
+      <!-- Appears floating right above the card when any landmark is pressed -->
+      <a-entity id="videoScreenGroup" position="0 0.12 0.08" visible="false">
+        <a-video id="videoPlane" src="#arVideo" width="0.85" height="0.48" position="0 0 0"></a-video>
+        
+        <!-- Header Banner on AR Video -->
+        <a-plane position="0 0.28 0.01" width="0.85" height="0.08" color="#081c10" material="opacity: 0.95">
+          <a-text id="arVideoTitle" value="LOCATION TITLE" align="center" color="#d4af37" width="1.2" baseline="center"></a-text>
+        </a-plane>
+
+        <!-- Direct AR Clickable Navigate Button below video -->
+        <a-plane id="arNavBtn" class="clickable" position="0 -0.28 0.01" width="0.5" height="0.08" color="#258cfb">
+          <a-text value="OPEN GOOGLE MAPS" align="center" color="#ffffff" width="1.1"></a-text>
+        </a-plane>
+
+        <!-- Close AR Button -->
+        <a-plane id="arCloseBtn" class="clickable" position="0.39 0.28 0.02" width="0.07" height="0.07" color="#e74c3c">
+          <a-text value="X" align="center" color="#ffffff" width="1.3"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- ================= 2. INTERACTIVE HOTSPOT BUTTONS ================= -->
+      <!-- Coordinated to match exact visual layout of your Ooty Card -->
+
+      <!-- Ooty Lake (Center Top-Left) -->
+      <a-plane class="clickable spot-btn" data-id="ooty_lake" position="-0.04 0.18 0.03" width="0.26" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Ooty Lake\n(13 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
       </a-plane>
 
-      <!-- Interactive 3D/Flat Pin Example: Pykara Lake -->
-      <a-plane 
-        class="clickable"
-        id="btn-pykara"
-        position="-0.35 0.35 0.02" 
-        height="0.12" 
-        width="0.35" 
-        color="#0d2818"
-        material="opacity: 0.9"
-        text="value: Pykara Lake\nTap to Navigate; color: #f3e5ab; align: center; width: 0.8;">
+      <!-- Pykara Lake & Falls (Far Top-Left) -->
+      <a-plane class="clickable spot-btn" data-id="pykara" position="-0.52 0.16 0.03" width="0.28" height="0.08" color="#081c10" material="opacity: 0.85">
+        <a-text value="Pykara Lake\n(55 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
       </a-plane>
 
-      <!-- Interactive 3D/Flat Pin Example: Avalanche Lake -->
-      <a-plane 
-        class="clickable"
-        id="btn-avalanche"
-        position="-0.25 -0.3 0.02" 
-        height="0.12" 
-        width="0.35" 
-        color="#0d2818"
-        material="opacity: 0.9"
-        text="value: Avalanche Lake\nTap to Navigate; color: #f3e5ab; align: center; width: 0.8;">
+      <!-- Rose Garden (Mid Left) -->
+      <a-plane class="clickable spot-btn" data-id="rose_garden" position="-0.32 -0.10 0.03" width="0.25" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Rose Garden\n(4 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
+      </a-plane>
+
+      <!-- Botanical Garden (Lower Left) -->
+      <a-plane class="clickable spot-btn" data-id="botanical_garden" position="-0.33 -0.22 0.03" width="0.27" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Botanical Garden\n(5 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
+      </a-plane>
+
+      <!-- Elk Hill Murugan Temple (Bottom Left) -->
+      <a-plane class="clickable spot-btn" data-id="murugan_temple" position="-0.28 -0.38 0.03" width="0.27" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Murugan Temple\n(8 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
+      </a-plane>
+
+      <!-- Government Museum (Center Right) -->
+      <a-plane class="clickable spot-btn" data-id="govt_museum" position="0.21 0.08 0.03" width="0.28" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Govt Museum\n(4 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
+      </a-plane>
+
+      <!-- Doddabetta Peak (Mid Right) -->
+      <a-plane class="clickable spot-btn" data-id="doddabetta" position="0.38 -0.08 0.03" width="0.28" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Doddabetta Peak\n(35 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
+      </a-plane>
+
+      <!-- Pine Forest (Bottom Center / Right) -->
+      <a-plane class="clickable spot-btn" data-id="pine_forest" position="0.28 -0.38 0.03" width="0.26" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Pine Forest\n(35 min)" align="center" color="#f3e5ab" width="0.65"></a-text>
+      </a-plane>
+
+      <!-- Avalanche Lake (Far Right) -->
+      <a-plane class="clickable spot-btn" data-id="avalanche" position="0.55 -0.01 0.03" width="0.27" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Avalanche Lake\n(1 hr 15 min)" align="center" color="#f3e5ab" width="0.62"></a-text>
+      </a-plane>
+
+      <!-- Mudumalai National Park (Top Right Peak) -->
+      <a-plane class="clickable spot-btn" data-id="mudumalai" position="0.52 0.28 0.03" width="0.28" height="0.07" color="#081c10" material="opacity: 0.85">
+        <a-text value="Mudumalai Park\n(1 hr 20 min)" align="center" color="#f3e5ab" width="0.62"></a-text>
       </a-plane>
 
     </a-entity>
   </a-scene>
 
   <script>
-    // Click listeners on AR buttons directly opening Google Maps routes
-    document.getElementById('btn-doddabetta').addEventListener('click', () => {
-      window.open('https://www.google.com/maps/dir/?api=1&destination=Doddabetta+Peak+Ooty', '_blank');
+    // Landmark Database: Videos, Titles, & Driving Coordinates
+    const PLACES = {
+      ooty_lake: {
+        title: "Ooty Lake & Boathouse",
+        time: "13 min (2.4 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", // Replace with your short mp4 clips
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Ooty+Lake+Boathouse"
+      },
+      pykara: {
+        title: "Pykara Waterfalls & Lake",
+        time: "55 min (21 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Pykara+Waterfalls"
+      },
+      rose_garden: {
+        title: "Government Rose Garden",
+        time: "4 min (0.6 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Government+Rose+Garden+Ooty"
+      },
+      botanical_garden: {
+        title: "Government Botanical Garden",
+        time: "5 min (0.8 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Government+Botanical+Garden+Ooty"
+      },
+      murugan_temple: {
+        title: "Elk Hill Murugan Temple",
+        time: "8 min (1.4 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Elk+Hill+Murugan+Temple+Ooty"
+      },
+      govt_museum: {
+        title: "Government Museum Ooty",
+        time: "4 min (0.7 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Government+Museum+Ooty"
+      },
+      doddabetta: {
+        title: "Doddabetta Peak Observatory",
+        time: "35 min (9.5 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Doddabetta+Peak"
+      },
+      pine_forest: {
+        title: "Pine Forest (Shooting Spot)",
+        time: "35 min (10 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Pine+Forest+Ooty"
+      },
+      avalanche: {
+        title: "Avalanche Lake Checkpoint",
+        time: "1 hr 15 min (25 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Avalanche+Lake+Ooty"
+      },
+      mudumalai: {
+        title: "Mudumalai Tiger Reserve",
+        time: "1 hr 20 min (37 km)",
+        video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        maps: "https://www.google.com/maps/dir/?api=1&destination=Mudumalai+National+Park"
+      }
+    };
+
+    let activeMapUrl = "#";
+    const videoEl = document.getElementById('arVideo');
+    const screenGroup = document.getElementById('videoScreenGroup');
+    const arTitle = document.getElementById('arVideoTitle');
+    const bottomBar = document.getElementById('active-info-bar');
+    const infoTitle = document.getElementById('info-title');
+    const infoTime = document.getElementById('info-time');
+    const mapsLink = document.getElementById('mapsLink');
+
+    // Attach click triggers to all AR landmark buttons
+    document.querySelectorAll('.spot-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        const data = PLACES[id];
+        if (!data) return;
+
+        activeMapUrl = data.maps;
+
+        // 1. Update Video Stream
+        videoEl.pause();
+        videoEl.src = data.video;
+        videoEl.load();
+        videoEl.play().catch(err => console.log("Autoplay policy handling:", err));
+
+        // 2. Position AR Video Plane and reveal
+        arTitle.setAttribute('value', data.title);
+        screenGroup.setAttribute('visible', 'true');
+
+        // 3. Update bottom 2D controller bar
+        infoTitle.innerText = data.title;
+        infoTime.innerText = "Drive time: " + data.time;
+        mapsLink.href = data.maps;
+        bottomBar.style.display = 'flex';
+      });
     });
 
-    document.getElementById('btn-pykara').addEventListener('click', () => {
-      window.open('https://www.google.com/maps/dir/?api=1&destination=Pykara+Lake+Ooty', '_blank');
+    // Handle AR in-scene navigation click
+    document.getElementById('arNavBtn').addEventListener('click', () => {
+      if (activeMapUrl && activeMapUrl !== '#') {
+        window.open(activeMapUrl, '_blank');
+      }
     });
 
-    document.getElementById('btn-avalanche').addEventListener('click', () => {
-      window.open('https://www.google.com/maps/dir/?api=1&destination=Avalanche+Lake+Ooty', '_blank');
+    // Close screen
+    function closeActiveSpot() {
+      videoEl.pause();
+      screenGroup.setAttribute('visible', 'false');
+      bottomBar.style.display = 'none';
+    }
+
+    document.getElementById('arCloseBtn').addEventListener('click', closeActiveSpot);
+
+    // Camera target found/lost status
+    const cardTarget = document.getElementById('cardTarget');
+    const scanPrompt = document.getElementById('scanPrompt');
+
+    cardTarget.addEventListener("targetFound", () => {
+      scanPrompt.innerText = "Card Locked! Tap any spot to view video";
+      scanPrompt.style.background = "rgba(46, 125, 50, 0.9)";
+    });
+
+    cardTarget.addEventListener("targetLost", () => {
+      scanPrompt.innerText = "Point Camera at Ooty Card";
+      scanPrompt.style.background = "rgba(8, 28, 16, 0.9)";
+      videoEl.pause();
     });
   </script>
 </body>
